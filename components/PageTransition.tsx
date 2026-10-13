@@ -6,15 +6,11 @@ import gsap from "gsap";
 
 // Circular wipe: a disc grows from the click point to cover the page, the route
 // changes underneath, then the disc shrinks back to the same point.
+// The disc is moved with transform only (compositor-driven), so it stays smooth on phones.
 export default function PageTransition() {
   const root = useRef<HTMLDivElement>(null);
   const covered = useRef(false);
-  const origin = useRef({ x: 0, y: 0 });
   const radius = useRef(0);
-  const paint = (r: number) => {
-    const { x, y } = origin.current;
-    root.current!.style.clipPath = `circle(${r}px at ${x}px ${y}px)`;
-  };
   const router = useRouter();
   const pathname = usePathname();
 
@@ -37,14 +33,13 @@ export default function PageTransition() {
       const r = a.getBoundingClientRect();
       const x = e.clientX || r.left + r.width / 2;
       const y = e.clientY || r.top + r.height / 2;
-      origin.current = { x, y };
       // radius that reaches the farthest corner
       radius.current = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
-      const o = { r: 0 };
-      gsap.set(root.current, { autoAlpha: 1 });
-      gsap.to(o, {
-        r: radius.current, duration: 0.7, ease: "power3.in",
-        onUpdate: () => paint(o.r),
+      const size = radius.current * 2;
+      gsap.set(root.current, { width: size, height: size, left: x - radius.current, top: y - radius.current, scale: 0, autoAlpha: 1 });
+      gsap.to(root.current, {
+        scale: 1, duration: 0.55, ease: "power3.in",
+        onStart: () => window.dispatchEvent(new CustomEvent("scene-pause", { detail: true })),
         onComplete: () => router.push(url.pathname + url.search + url.hash),
       });
     };
@@ -56,10 +51,9 @@ export default function PageTransition() {
   useEffect(() => {
     if (!covered.current) return;
     covered.current = false;
-    const o = { r: radius.current };
-    gsap.to(o, {
-      r: 0, duration: 0.8, ease: "power3.out", delay: 0.1,
-      onUpdate: () => paint(o.r),
+    window.dispatchEvent(new CustomEvent("scene-pause", { detail: false }));
+    gsap.to(root.current, {
+      scale: 0, duration: 0.6, ease: "power3.out", delay: 0.1,
       onComplete: () => { gsap.set(root.current, { autoAlpha: 0 }); },
     });
   }, [pathname]);

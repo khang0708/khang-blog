@@ -2,6 +2,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import { FAST, pickModel, SMART } from "@/lib/chatModel";
 import { getConfig } from "@/lib/config";
 import { recordUsage, tokensToday } from "@/lib/usage";
+import { localAnswer } from "@/lib/localAnswer";
+import { listPosts } from "@/lib/posts";
 import { education, hero, jobs, profile, projects, stack } from "@/lib/content";
 
 export const runtime = "nodejs";
@@ -83,19 +85,20 @@ function valid(body: unknown): body is { messages: Msg[] } {
 
 export async function POST(req: Request) {
   const cfg = getConfig();
-  if (!cfg.anthropicKey) {
-    return Response.json({ error: "not_configured" }, { status: 503 });
-  }
-  // daily token cap set in the admin page (0 = off): protects the key from abuse and surprise bills
-  if (cfg.dailyTokenLimit > 0 && tokensToday() >= cfg.dailyTokenLimit) {
-    return Response.json({ error: "budget" }, { status: 503 });
-  }
 
   const ip = req.headers.get("x-forwarded-for")?.split(",")[0].trim() ?? "local";
   if (limited(ip)) return Response.json({ error: "rate_limited" }, { status: 429 });
 
   const body = await req.json().catch(() => null);
   if (!valid(body)) return Response.json({ error: "bad_request" }, { status: 400 });
+
+  // Offline assistant: used when there is no key, or the daily token cap set in the admin page (0 = off) is spent.
+  const local = () =>
+    new Response(localAnswer(body.messages[body.messages.length - 1].content, listPosts(true)), {
+      headers: { "Content-Type": "text/plain; charset=utf-8", "Cache-Control": "no-store", "X-Chat-Model": "local" },
+    });
+  if (!cfg.anthropicKey) return local();
+  if (cfg.dailyTokenLimit > 0 && tokensToday() >= cfg.dailyTokenLimit) return local();
 
   // CHAT_MODEL env pins one model; otherwise the admin setting decides: fast = Haiku, smart = Sonnet, auto = routed per question.
   const pinned = process.env.CHAT_MODEL || (cfg.modelMode === "fast" ? FAST : cfg.modelMode === "smart" ? SMART : undefined);
@@ -116,9 +119,11 @@ export async function POST(req: Request) {
   return new Response(
     new ReadableStream({
       async start(controller) {
+        let sent = false;
         try {
           for await (const ev of stream) {
             if (ev.type === "content_block_delta" && ev.delta.type === "text_delta") {
+              sent = true;
               controller.enqueue(encoder.encode(ev.delta.text));
             }
           }
@@ -126,7 +131,8 @@ export async function POST(req: Request) {
           recordUsage(model, u.input_tokens, u.output_tokens);
         } catch (e) {
           console.error("chat stream failed", e instanceof Error ? e.message : e);
-          controller.enqueue(encoder.encode("\n[error]"));
+          // bad key, no credit or an outage: answer from the site's own content instead of showing an error
+          controller.enqueue(encoder.encode(sent ? "\n[error]" : localAnswer(body.messages[body.messages.length - 1].content, listPosts(true))));
         }
         controller.close();
       },

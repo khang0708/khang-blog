@@ -84,10 +84,11 @@ export default function Particles({ reduced }: { reduced: boolean }) {
 
   const geometry = useMemo(() => {
     const rand = mulberry32(1337);
-    const position = new Float32Array(POINT_COUNT * 3);
-    const field = new Float32Array(POINT_COUNT * 3);
-    const seed = new Float32Array(POINT_COUNT);
-    for (let i = 0; i < POINT_COUNT; i++) {
+    const count = window.matchMedia("(max-width: 820px), (pointer: coarse)").matches ? 14000 : POINT_COUNT;
+    const position = new Float32Array(count * 3);
+    const field = new Float32Array(count * 3);
+    const seed = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
       // shell-biased sphere
       const u = rand() * 2 - 1;
       const phi = rand() * Math.PI * 2;

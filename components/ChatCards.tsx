@@ -37,6 +37,24 @@ export function ProjectCard({ arg, close }: Props) {
   );
 }
 
+// arg is "slug|title": posts live on the server, so the directive carries what the card needs.
+export function PostCard({ arg, close }: Props) {
+  const { t } = useLang();
+  const [slug, ...rest] = arg.split("|");
+  const title = rest.join("|").trim();
+  if (!/^[a-z0-9-]+$/.test(slug)) return null;
+  return (
+    <Link href={`/blog/${slug}`} className="cc cc-project" onClick={close}>
+      <div className="cc-top">
+        <span className="cc-icon"><Sparkles size={20} aria-hidden="true" /></span>
+        <strong>{title || slug}</strong>
+        <ArrowUpRight size={18} className="cc-arrow" aria-hidden="true" />
+      </div>
+      <span className="cc-cta">{t({ en: "Read the post", vi: "Đọc bài viết" })} →</span>
+    </Link>
+  );
+}
+
 export function JobCard({ arg, close }: Props) {
   const { t } = useLang();
   const j = jobs.find((x) => x.id === arg);

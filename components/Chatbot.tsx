@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Briefcase, Layers, Mail, MessageCircle, RotateCcw, Send, Sparkles, UserRound, X } from "lucide-react";
 import { useLang } from "@/lib/i18n";
 import { parseChat, type Part } from "@/lib/chatParse";
-import { ContactCard, GotoButton, JobCard, LiveCard, ProjectCard, SkillsCard, StatsCard } from "./ChatCards";
+import { ContactCard, GotoButton, JobCard, LiveCard, PostCard, ProjectCard, SkillsCard, StatsCard } from "./ChatCards";
 import LiveView, { useLive } from "./LiveChat";
 import LeadForm from "./LeadForm";
 import { OPEN_CHAT, type OpenChat } from "@/lib/chatBridge";
@@ -30,6 +30,7 @@ function Card({ part, close, openLive }: { part: Extract<Part, { type: "card" }>
     case "goto": return <GotoButton {...p} />;
     case "live": return <LiveCard openLive={openLive} />;
     case "lead": return <LeadForm />;
+    case "post": return <PostCard {...p} />;
   }
 }
 

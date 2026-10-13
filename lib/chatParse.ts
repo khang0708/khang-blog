@@ -2,10 +2,10 @@
 // The UI turns directives into cards and buttons built from lib/content.ts, so the facts in a card are never model-written.
 export type Part =
   | { type: "text"; text: string }
-  | { type: "card"; kind: "project" | "job" | "skills" | "contact" | "stats" | "goto" | "live" | "lead"; arg: string }
+  | { type: "card"; kind: "project" | "job" | "skills" | "contact" | "stats" | "goto" | "live" | "lead" | "post"; arg: string }
   | { type: "reply"; text: string };
 
-const RE = /\[\[(project|job|skills|contact|stats|goto|live|lead|reply)(?::([^\]]*))?\]\]/g;
+const RE = /\[\[(project|job|skills|contact|stats|goto|live|lead|post|reply)(?::([^\]]*))?\]\]/g;
 
 export function parseChat(raw: string): Part[] {
   // while streaming, a directive may be cut off mid-way: hide it until it closes
