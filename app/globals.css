@@ -80,15 +80,15 @@ main, .footer { position: relative; z-index: 1; }
   padding: 120px var(--pad) 72px;
   position: relative;
 }
-.hero-inner { max-width: 660px; }
+.hero-inner { max-width: 660px; container-type: inline-size; }
 .hero-role { color: var(--accent); font-weight: 500; margin-bottom: 18px; }
 .hero-name {
   font-family: var(--display); font-weight: 700;
-  font-size: clamp(3.4rem, 10vw, 8.5rem);
+  font-size: clamp(2.6rem, 17cqw, 8.5rem); /* "Nhật Khang" is ~5.4em wide, so 17cqw always fits the column */
   line-height: 0.95; letter-spacing: -0.035em;
   margin-bottom: 32px;
 }
-.h-line { display: block; overflow: hidden; padding: 0.3em 0.05em 0.12em; margin: -0.3em -0.05em -0.12em; } /* room for stacked Vietnamese diacritics */
+.h-line { display: block; white-space: nowrap; overflow: hidden; padding: 0.3em 0.05em 0.12em; margin: -0.3em -0.05em -0.12em; } /* room for stacked Vietnamese diacritics */
 .h-char { display: inline-block; will-change: transform; transform-origin: 0 100%; transition: color 0.2s; } /* no transform transition: it fights GSAP */
 .h-char:hover { color: var(--warm); }
 .hero-lead { font-family: var(--display); font-size: clamp(1.35rem, 2.4vw, 1.9rem); font-weight: 500; line-height: 1.25; max-width: 24em; margin-bottom: 16px; }
@@ -218,15 +218,15 @@ main, .footer { position: relative; z-index: 1; }
   padding: 120px var(--pad) 72px;
   position: relative;
 }
-.hero-inner { max-width: 660px; }
+.hero-inner { max-width: 660px; container-type: inline-size; }
 .hero-role { color: var(--accent); font-weight: 500; margin-bottom: 18px; }
 .hero-name {
   font-family: var(--display); font-weight: 700;
-  font-size: clamp(3.4rem, 10vw, 8.5rem);
+  font-size: clamp(2.6rem, 17cqw, 8.5rem); /* "Nhật Khang" is ~5.4em wide, so 17cqw always fits the column */
   line-height: 0.95; letter-spacing: -0.035em;
   margin-bottom: 32px;
 }
-.h-line { display: block; overflow: hidden; padding: 0.3em 0.05em 0.12em; margin: -0.3em -0.05em -0.12em; } /* room for stacked Vietnamese diacritics */
+.h-line { display: block; white-space: nowrap; overflow: hidden; padding: 0.3em 0.05em 0.12em; margin: -0.3em -0.05em -0.12em; } /* room for stacked Vietnamese diacritics */
 .h-char { display: inline-block; will-change: transform; transform-origin: 0 100%; transition: color 0.2s; } /* no transform transition: it fights GSAP */
 .h-char:hover { color: var(--warm); }
 .hero-lead { font-family: var(--display); font-size: clamp(1.35rem, 2.4vw, 1.9rem); font-weight: 500; line-height: 1.25; max-width: 24em; margin-bottom: 16px; }
